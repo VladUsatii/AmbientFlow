@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ambient Flow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        background: #040816;
+      }
+
+      @keyframes floatA {
+        0% {
+          transform: translate3d(-6%, -4%, 0) scale(1);
+        }
+        50% {
+          transform: translate3d(10%, 6%, 0) scale(1.12);
+        }
+        100% {
+          transform: translate3d(2%, 14%, 0) scale(0.96);
+        }
+      }
+
+      @keyframes floatB {
+        0% {
+          transform: translate3d(8%, -8%, 0) scale(1.08);
+        }
+        50% {
+          transform: translate3d(-10%, 10%, 0) scale(0.94);
+        }
+        100% {
+          transform: translate3d(4%, -2%, 0) scale(1.15);
+        }
+      }
+
+      @keyframes floatC {
+        0% {
+          transform: translate3d(0%, 0%, 0) scale(1);
+        }
+        50% {
+          transform: translate3d(-8%, -10%, 0) scale(1.1);
+        }
+        100% {
+          transform: translate3d(10%, 8%, 0) scale(0.92);
+        }
+      }
+
+      @keyframes promptFloat {
+        0% {
+          transform: translateY(0px);
+          opacity: 0.18;
+        }
+        50% {
+          transform: translateY(-4px);
+          opacity: 0.28;
+        }
+        100% {
+          transform: translateY(0px);
+          opacity: 0.2;
+        }
+      }
+
+      .orb-a {
+        animation: floatA 22s ease-in-out infinite alternate;
+      }
+
+      .orb-b {
+        animation: floatB 26s ease-in-out infinite alternate;
+      }
+
+      .orb-c {
+        animation: floatC 30s ease-in-out infinite alternate;
+      }
+
+      .glass {
+        background: rgba(7, 12, 28, 0.42);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+
+      .panel-soft {
+        background: rgba(10, 16, 35, 0.52);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
+
+      .prompt-hero {
+        animation: promptFloat 9s ease-in-out infinite;
+        text-shadow:
+          0 0 18px rgba(255, 255, 255, 0.06),
+          0 0 36px rgba(159, 176, 255, 0.08);
+      }
+
+      input[type="range"] {
+        accent-color: #8fa4ff;
+      }
+
+      #sceneOut {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    </style>
+  </head>
+  <body class="relative overflow-x-hidden bg-[#040816] text-slate-100 antialiased">
+    <!-- animated dark gradient background -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(88,101,242,0.16),_transparent_38%),radial-gradient(circle_at_80%_20%,_rgba(28,154,122,0.12),_transparent_24%),radial-gradient(circle_at_50%_100%,_rgba(90,52,160,0.12),_transparent_34%),linear-gradient(180deg,_#08101f_0%,_#040816_55%,_#02040f_100%)]"></div>
+
+      <div class="orb-a absolute -left-24 top-[-8rem] h-[30rem] w-[30rem] rounded-full bg-indigo-500/18 blur-[130px]"></div>
+      <div class="orb-b absolute right-[-8rem] top-[10%] h-[28rem] w-[28rem] rounded-full bg-emerald-400/12 blur-[130px]"></div>
+      <div class="orb-c absolute bottom-[-10rem] left-[25%] h-[32rem] w-[32rem] rounded-full bg-violet-500/14 blur-[150px]"></div>
+
+      <div class="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.02),transparent_18%,transparent_82%,rgba(255,255,255,0.015))]"></div>
+    </div>
+
+    <!-- top bar -->
+    <header class="fixed inset-x-0 top-0 z-30 px-4 pt-4 md:px-6 md:pt-5">
+      <div class="relative mx-auto flex h-14 w-full max-w-7xl items-center justify-end">
+        <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div
+            class="inline-flex h-11 w-11 items-center justify-center rounded-full glass text-slate-100 shadow-[0_10px_35px_rgba(0,0,0,0.28)]"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              class="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.65"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z" />
+              <circle cx="12" cy="12" r="2.75" />
+            </svg>
+          </div>
+        </div>
+
+        <button
+          id="menuBtn"
+          type="button"
+          aria-label="Open menu"
+          class="inline-flex h-11 w-11 items-center justify-center rounded-full glass text-slate-200 shadow-[0_10px_35px_rgba(0,0,0,0.28)] transition hover:bg-white/10"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- main visualizer -->
+    <main class="relative z-10 px-3 pb-44 pt-24 md:px-5 md:pb-48 md:pt-28">
+      <div class="mx-auto w-full max-w-[1700px]">
+        <div class="relative">
+            <div class="pointer-events-none absolute left-4 top-4 z-20 w-[min(420px,calc(100%-2rem))] md:left-6 md:top-6">
+            <div class="glass rounded-[1.5rem] border border-white/8 p-4 shadow-[0_18px_55px_rgba(0,0,0,0.32)]">
+                <div class="mb-3 flex items-center justify-between">
+                <div class="text-[10px] uppercase tracking-[0.22em] text-slate-400">Streaming salience</div>
+                <div id="analysisStatus" class="text-[11px] uppercase tracking-[0.18em] text-emerald-300/80">idle</div>
+                </div>
+            
+                <div class="grid grid-cols-3 gap-3">
+                <div class="rounded-2xl bg-white/5 px-3 py-3">
+                    <div class="text-[10px] uppercase tracking-[0.18em] text-slate-400">Salience</div>
+                    <div id="salienceValue" class="mt-1 text-xl font-semibold text-emerald-200">0.00</div>
+                </div>
+                <div class="rounded-2xl bg-white/5 px-3 py-3">
+                    <div class="text-[10px] uppercase tracking-[0.18em] text-slate-400">Focus risk</div>
+                    <div id="focusRiskValue" class="mt-1 text-xl font-semibold text-amber-200">0.00</div>
+                </div>
+                <div class="rounded-2xl bg-white/5 px-3 py-3">
+                    <div class="text-[10px] uppercase tracking-[0.18em] text-slate-400">Novelty</div>
+                    <div id="noveltyValue" class="mt-1 text-xl font-semibold text-sky-200">0.00</div>
+                </div>
+                </div>
+            
+                <div class="mt-3 rounded-2xl bg-white/5 px-3 py-3 text-xs leading-5 text-slate-300">
+                <span class="mr-2 uppercase tracking-[0.18em] text-slate-500">Drivers</span>
+                <span id="analysisReasons">waiting for stable audio features…</span>
+                </div>
+            </div>
+            </div>
+          <canvas
+            id="vizCanvas"
+            class="block h-[70vh] min-h-[500px] w-full rounded-[2.25rem] bg-black/10 shadow-[0_24px_80px_rgba(0,0,0,0.45)] md:h-[78vh] md:min-h-[680px]"
+          ></canvas>
+
+          <div class="pointer-events-none absolute inset-0 rounded-[2.25rem] bg-[linear-gradient(to_bottom,rgba(255,255,255,0.04),transparent_20%,transparent_80%,rgba(255,255,255,0.03))]"></div>
+
+          <!-- center prompt overlay -->
+          <div class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-8 md:px-20">
+            <div
+              id="generatedPrompt"
+              class="prompt-hero max-w-6xl text-center text-[clamp(2rem,5vw,5.75rem)] font-medium leading-[0.95] tracking-[-0.04em] text-white/20"
+            >
+              —
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- bottom controls -->
+    <div class="fixed inset-x-0 bottom-0 z-20 px-3 pb-3 md:px-5 md:pb-5">
+      <div class="mx-auto w-full max-w-7xl rounded-[2rem] panel-soft p-4 shadow-[0_18px_70px_rgba(0,0,0,0.42)]">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3 xl:max-w-2xl">
+            <div>
+              <label for="mode" class="mb-2 block text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                Mode
+              </label>
+              <select
+                id="mode"
+                class="w-full rounded-2xl bg-white/5 px-4 py-3 text-slate-100 outline-none transition focus:bg-white/10"
+              >
+                <option value="focus" selected>focus</option>
+                <option value="relax">relax</option>
+                <option value="sleep">sleep</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="seed" class="mb-2 block text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                Seed
+              </label>
+              <input
+                id="seed"
+                type="number"
+                placeholder="blank = random"
+                class="w-full rounded-2xl bg-white/5 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:bg-white/10"
+              />
+            </div>
+
+            <div>
+              <label for="gain" class="mb-2 block text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                Output gain
+              </label>
+              <div class="rounded-2xl bg-white/5 px-4 py-[0.95rem]">
+                <input id="gain" type="range" min="0" max="100" value="72" class="w-full bg-transparent" />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-3 xl:items-end">
+            <label class="inline-flex items-center gap-3 text-sm text-slate-300">
+              <input
+                id="autoEvolve"
+                type="checkbox"
+                checked
+                class="h-4 w-4 rounded bg-white/10 text-slate-200"
+              />
+              <span>Auto-generate and morph new scenes over time</span>
+            </label>
+
+            <div class="flex flex-wrap gap-2">
+              <button
+                id="startBtn"
+                type="button"
+                aria-label="Start Audio"
+                class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-950 transition hover:bg-slate-200"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  class="ml-0.5 h-5 w-5"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M8 6.5v11l9-5.5-9-5.5Z"></path>
+                </svg>
+              </button>
+
+              <button
+                id="generateBtn"
+                type="button"
+                aria-label="Morph Now"
+                class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-slate-100 transition hover:bg-white/15"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  class="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M8 4H4v4" />
+                  <path d="M16 20h4v-4" />
+                  <path d="M20 8V4h-4" />
+                  <path d="M4 16v4h4" />
+                  <path d="M4.8 8.8A8 8 0 0 1 18 6" />
+                  <path d="M19.2 15.2A8 8 0 0 1 6 18" />
+                </svg>
+              </button>
+
+              <button
+                id="stopBtn"
+                type="button"
+                aria-label="Stop Audio"
+                class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-slate-100 transition hover:bg-white/15"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  class="h-5 w-5"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <rect x="7" y="7" width="10" height="10" rx="1.6"></rect>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto] md:items-center">
+          <div class="min-w-0">
+            <div class="mb-2 flex flex-wrap items-center gap-2 text-sm">
+              <div id="status" class="text-slate-300">Idle.</div>
+              <div id="nextMorph" class="rounded-full bg-white/8 px-3 py-1 text-xs text-slate-400">
+                auto-evolve on
+              </div>
+            </div>
+
+            <div class="h-3 w-full overflow-hidden rounded-full bg-white/10">
+              <div
+                id="meterFill"
+                class="h-full w-0 rounded-full bg-[linear-gradient(90deg,rgba(153,169,255,0.95),rgba(72,191,155,0.95))] transition-[width] duration-100 ease-linear"
+              ></div>
+            </div>
+          </div>
+
+          <div class="text-xs text-slate-500 md:text-right">
+            Output level
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- menu backdrop -->
+    <div
+      id="menuBackdrop"
+      class="pointer-events-none fixed inset-0 z-40 bg-black/40 opacity-0 transition duration-300"
+    ></div>
+
+    <!-- right drawer -->
+    <aside
+      id="menuPanel"
+      class="fixed right-0 top-0 z-50 flex h-full w-full max-w-md translate-x-full flex-col bg-[#07101f]/92 p-5 shadow-[-24px_0_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl transition duration-300"
+      aria-hidden="true"
+    >
+      <div class="mb-5 flex items-center justify-between">
+        <div>
+          <div class="text-[11px] uppercase tracking-[0.24em] text-slate-500">Menu</div>
+          <div class="mt-1 text-lg font-medium text-slate-100">Scene + controls</div>
+        </div>
+
+        <button
+          id="menuCloseBtn"
+          type="button"
+          aria-label="Close menu"
+          class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/8 text-slate-200 transition hover:bg-white/12"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="flex-1 space-y-5 overflow-y-auto pr-1">
+        <section class="rounded-[1.5rem] bg-white/5 p-4">
+          <div class="mb-3 text-[11px] uppercase tracking-[0.22em] text-slate-400">
+            Current scene JSON
+          </div>
+          <pre id="sceneOut" class="max-h-[38vh] overflow-auto text-xs leading-6 text-slate-200">{}</pre>
+        </section>
+
+        <section class="rounded-[1.5rem] bg-white/5 p-4">
+            <div class="mb-3 text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                Streaming salience JSON
+            </div>
+            <pre id="analysisOut" class="max-h-[30vh] overflow-auto text-xs leading-6 text-slate-200">{}</pre>
+        </section>
+
+        <section class="rounded-[1.5rem] bg-white/5 p-4">
+          <label for="prompt" class="mb-3 block text-[11px] uppercase tracking-[0.22em] text-slate-400">
+            Creative bias (optional)
+          </label>
+          <textarea
+            id="prompt"
+            placeholder="Optional soft steering signal"
+            class="min-h-[120px] w-full rounded-2xl bg-black/20 px-4 py-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:bg-black/25"
+          ></textarea>
+          <p class="mt-3 text-xs leading-5 text-slate-500">
+            Hidden from the main surface, preserved for backend compatibility.
+          </p>
+        </section>
+      </div>
+    </aside>
+
+    <script type="module" src="/static/app.js"></script>
+
+    <script>
+      const menuBtn = document.getElementById("menuBtn");
+      const menuPanel = document.getElementById("menuPanel");
+      const menuBackdrop = document.getElementById("menuBackdrop");
+      const menuCloseBtn = document.getElementById("menuCloseBtn");
+
+      function openMenu() {
+        menuPanel.classList.remove("translate-x-full");
+        menuBackdrop.classList.remove("opacity-0", "pointer-events-none");
+        menuPanel.setAttribute("aria-hidden", "false");
+      }
+
+      function closeMenu() {
+        menuPanel.classList.add("translate-x-full");
+        menuBackdrop.classList.add("opacity-0", "pointer-events-none");
+        menuPanel.setAttribute("aria-hidden", "true");
+      }
+
+      menuBtn?.addEventListener("click", openMenu);
+      menuCloseBtn?.addEventListener("click", closeMenu);
+      menuBackdrop?.addEventListener("click", closeMenu);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeMenu();
+      });
+    </script>
+  </body>
+</html>
